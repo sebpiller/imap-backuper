@@ -1,0 +1,36 @@
+month,establishment,amount_chf,stay_start,stay_end,nights,avg_chf_per_night,invoice_date,ref,file,amount_source,date_source
+2025-01,Primadom Aparthotel,197.50,2025-01-07,2025-01-09,2,98.75,2025-01-09,20250109019,Invoices_hotel/2025/01/2025-01-09-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-01,Primadom Aparthotel,197.50,2025-01-14,2025-01-16,2,98.75,2025-01-16,20250116042,Invoices_hotel/2025/01/2025-01-16-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-01,Primadom Aparthotel,197.50,2025-01-22,2025-01-24,2,98.75,2025-01-24,20250124083,Invoices_hotel/2025/01/2025-01-24-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-01,Primadom Aparthotel,197.50,2025-01-28,2025-01-30,2,98.75,2025-01-30,20250130106,Invoices_hotel/2025/01/2025-01-30-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-02,Primadom Aparthotel,197.50,2025-02-04,2025-02-06,2,98.75,2025-02-06,20250206132,Invoices_hotel/2025/02/2025-02-06-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-02,Primadom Aparthotel,197.50,2025-02-19,2025-02-21,2,98.75,2025-02-21,20250221210,Invoices_hotel/2025/02/2025-02-21-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-02,Primadom Aparthotel,197.50,2025-02-25,2025-02-27,2,98.75,2025-02-27,20250227237,Invoices_hotel/2025/02/2025-02-27-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-03,Primadom Aparthotel,197.50,2025-03-04,2025-03-06,2,98.75,2025-03-06,20250306260,Invoices_hotel/2025/03/2025-03-06-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-03,Primadom Aparthotel,197.50,2025-03-11,2025-03-13,2,98.75,2025-03-13,20250313287,Invoices_hotel/2025/03/2025-03-13-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-03,Primadom Aparthotel,197.50,2025-03-19,2025-03-21,2,98.75,2025-03-21,20250321328,Invoices_hotel/2025/03/2025-03-21-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-03,Primadom Aparthotel,197.50,2025-03-26,2025-03-28,2,98.75,2025-03-28,20250328360,Invoices_hotel/2025/03/2025-03-28-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-04,Primadom Aparthotel,197.50,2025-04-01,2025-04-03,2,98.75,2025-04-03,20250403422,Invoices_hotel/2025/04/2025-04-03-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-04,Primadom Aparthotel,197.50,2025-04-08,2025-04-10,2,98.75,2025-04-10,20250410498,Invoices_hotel/2025/04/2025-04-10-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-04,Primadom Aparthotel,197.50,2025-04-15,2025-04-17,2,98.75,2025-04-16,20250416518,Invoices_hotel/2025/04/2025-04-16-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-04,Starling Hotel Residence Geneve,133.35,2025-04-28,2025-04-29,1,133.35,2025-04-29,,Invoices_hotel/2025/04/2025-04-29-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2025-04,Primadom Aparthotel,197.50,2025-04-29,2025-05-01,2,98.75,2025-05-01,20250501553,Invoices_hotel/2025/05/2025-05-01-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-05,Primadom Aparthotel,197.50,2025-05-06,2025-05-08,2,98.75,2025-05-08,20250508586,Invoices_hotel/2025/05/2025-05-08-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-05,Airbnb,98.95,2025-05-14,2025-05-15,1,98.95,2025-05-14,HMS4R55PHK,maybe/2025/05/2025-05-14-Airbnb.html,receipt total line,visible human date range
+2025-05,Primadom Aparthotel,197.50,2025-05-20,2025-05-22,2,98.75,2025-05-22,20250522738,Invoices_hotel/2025/05/2025-05-22-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-05,Primadom Aparthotel,197.50,2025-05-26,2025-05-28,2,98.75,2025-05-27,20250527783,Invoices_hotel/2025/05/2025-05-27-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-06,Primadom Aparthotel,197.50,2025-06-10,2025-06-12,2,98.75,2025-06-10,20250610871,Invoices_hotel/2025/06/2025-06-10-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-06,Primadom Aparthotel,197.50,2025-06-24,2025-06-26,2,98.75,2025-06-26,202506261057,Invoices_hotel/2025/06/2025-06-26-Primadom Aparthotel.pdf,Montant total TTC,Séjour du/au
+2025-08,Starling Hotel Residence Geneve,277.50,2025-08-05,2025-08-07,2,138.75,2025-08-07,,Invoices_hotel/2025/08/2025-08-07-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2025-08,Starling Hotel Residence Geneve,277.50,2025-08-12,2025-08-14,2,138.75,2025-08-07,,Invoices_hotel/2025/08/2025-08-07-Starling Hotel Residence Geneve-2.pdf,Total incl. TVA,Dates of Stay
+2025-09,Airbnb,209.35,2025-09-17,2025-09-19,2,104.68,2025-09-10,HMHQ25QT9R,maybe/2025/09/2025-09-10-Airbnb.html,receipt total line,visible human date range
+2025-10,Starling Hotel Residence Geneve,245.50,2025-10-21,2025-10-23,2,122.75,2025-10-23,,Invoices_hotel/2025/10/2025-10-23-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2025-11,Starling Hotel Residence Geneve,287.50,2025-11-18,2025-11-20,2,143.75,2025-11-20,,Invoices_hotel/2025/11/2025-11-20-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2025-12,Starling Hotel Residence Geneve,257.50,2025-12-02,2025-12-04,2,128.75,2025-12-04,,Invoices_hotel/2025/12/2025-12-04-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2025-12,Starling Hotel Residence Geneve,257.50,2025-12-17,2025-12-19,2,128.75,2025-12-19,,Invoices_hotel/2025/12/2025-12-19-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2026-03,Starling Hotel Residence Geneve,268.50,2026-03-31,2026-04-02,2,134.25,2026-04-02,,Invoices_hotel/2026/04/2026-04-02-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2026-04,Starling Hotel Residence Geneve,248.50,2026-04-07,2026-04-09,2,124.25,2026-04-09,,Invoices_hotel/2026/04/2026-04-09-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2026-05,Starling Hotel Residence Geneve,308.50,2026-05-06,2026-05-08,2,154.25,2026-05-08,,Invoices_hotel/2026/05/2026-05-08-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2026-05,Starling Hotel Residence Geneve,144.25,2026-05-12,2026-05-13,1,144.25,2026-05-13,,Invoices_hotel/2026/05/2026-05-13-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2026-05,Starling Hotel Residence Geneve,144.25,2026-05-26,2026-05-27,1,144.25,2026-05-27,,Invoices_hotel/2026/05/2026-05-27-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay
+2026-06,Starling Hotel Residence Geneve,288.50,2026-06-02,2026-06-04,2,144.25,2026-06-04,,Invoices_hotel/2026/06/2026-06-04-Starling Hotel Residence Geneve.pdf,Total incl. TVA,Dates of Stay

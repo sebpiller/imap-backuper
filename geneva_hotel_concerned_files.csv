@@ -1,0 +1,53 @@
+file,source_type,establishment,stay_start,stay_end,nights,amount_chf,official_chf,non_official_chf,invoice_date,ref
+Invoices_hotel/2025/01/2025-01-09-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-01-07,2025-01-09,2,197.50,197.50,0.00,2025-01-09,20250109019
+Invoices_hotel/2025/01/2025-01-16-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-01-14,2025-01-16,2,197.50,197.50,0.00,2025-01-16,20250116042
+Invoices_hotel/2025/01/2025-01-24-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-01-22,2025-01-24,2,197.50,197.50,0.00,2025-01-24,20250124083
+Invoices_hotel/2025/01/2025-01-30-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-01-28,2025-01-30,2,197.50,197.50,0.00,2025-01-30,20250130106
+Invoices_hotel/2025/02/2025-02-06-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-02-04,2025-02-06,2,197.50,197.50,0.00,2025-02-06,20250206132
+Invoices_hotel/2025/02/2025-02-21-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-02-19,2025-02-21,2,197.50,197.50,0.00,2025-02-21,20250221210
+Invoices_hotel/2025/02/2025-02-27-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-02-25,2025-02-27,2,197.50,197.50,0.00,2025-02-27,20250227237
+Invoices_hotel/2025/03/2025-03-06-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-03-04,2025-03-06,2,197.50,197.50,0.00,2025-03-06,20250306260
+Invoices_hotel/2025/03/2025-03-13-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-03-11,2025-03-13,2,197.50,197.50,0.00,2025-03-13,20250313287
+Invoices_hotel/2025/03/2025-03-21-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-03-19,2025-03-21,2,197.50,197.50,0.00,2025-03-21,20250321328
+Invoices_hotel/2025/03/2025-03-28-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-03-26,2025-03-28,2,197.50,197.50,0.00,2025-03-28,20250328360
+Invoices_hotel/2025/04/2025-04-03-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-04-01,2025-04-03,2,197.50,197.50,0.00,2025-04-03,20250403422
+Invoices_hotel/2025/04/2025-04-10-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-04-08,2025-04-10,2,197.50,197.50,0.00,2025-04-10,20250410498
+Invoices_hotel/2025/04/2025-04-16-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-04-15,2025-04-17,2,197.50,197.50,0.00,2025-04-16,20250416518
+Invoices_hotel/2025/04/2025-04-29-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2025-04-28,2025-04-29,1,133.35,133.35,0.00,2025-04-29,
+Invoices_hotel/2025/05/2025-05-01-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-04-29,2025-05-01,2,197.50,197.50,0.00,2025-05-01,20250501553
+Invoices_hotel/2025/05/2025-05-08-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-05-06,2025-05-08,2,197.50,197.50,0.00,2025-05-08,20250508586
+maybe/2025/05/2025-05-13-Ramada Encore by Wyndham Geneva-12.html,non_official,Ramada Encore by Wyndham Geneva,2025-05-13,2025-05-14,1,164.74,0.00,164.74,2025-05-13,4675513302
+maybe/2025/05/2025-05-14-Airbnb.html,official,Airbnb,2025-05-14,2025-05-15,1,98.95,98.95,0.00,2025-05-14,HMS4R55PHK
+Invoices_hotel/2025/05/2025-05-22-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-05-20,2025-05-22,2,197.50,197.50,0.00,2025-05-22,20250522738
+Invoices_hotel/2025/05/2025-05-27-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-05-26,2025-05-28,2,197.50,197.50,0.00,2025-05-27,20250527783
+Invoices_hotel/2025/06/2025-06-10-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-06-10,2025-06-12,2,197.50,197.50,0.00,2025-06-10,20250610871
+maybe/2025/06/2025-06-17-Airbnb-2.html,official,Airbnb,2025-06-17,2025-06-19,2,217.30,217.30,0.00,2025-06-17,HMSZYFKEBF
+Invoices_hotel/2025/06/2025-06-26-Primadom Aparthotel.pdf,official,Primadom Aparthotel,2025-06-24,2025-06-26,2,197.50,197.50,0.00,2025-06-26,202506261057
+maybe/2025/07/2025-07-01-Starling Hotel Residence Geneve-2.html,non_official,Starling Hotel Residence Geneve,2025-07-29,2025-07-31,2,241.20,0.00,241.20,2025-07-01,5135170766
+Invoices_hotel/2025/08/2025-08-07-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2025-08-05,2025-08-07,2,277.50,277.50,0.00,2025-08-07,
+Invoices_hotel/2025/08/2025-08-07-Starling Hotel Residence Geneve-2.pdf,official,Starling Hotel Residence Geneve,2025-08-12,2025-08-14,2,277.50,277.50,0.00,2025-08-07,
+maybe/2025/09/2025-09-03-Ramada Encore by Wyndham Geneva-5.html,non_official,Ramada Encore by Wyndham Geneva,2025-09-03,2025-09-05,2,231.21,0.00,231.21,2025-09-03,6685253642
+maybe/2025/09/2025-09-10-Airbnb.html,official,Airbnb,2025-09-17,2025-09-19,2,209.35,209.35,0.00,2025-09-10,HMHQ25QT9R
+maybe/2025/09/2025-09-24-Ramada Encore by Wyndham Geneva-2.html,non_official,Ramada Encore by Wyndham Geneva,2025-09-24,2025-09-26,2,273.60,0.00,273.60,2025-09-24,6361319572
+maybe/2025/10/2025-10-02-Ramada Encore by Wyndham Geneva-3.html,non_official,Ramada Encore by Wyndham Geneva,2025-10-02,2025-10-04,2,251.45,0.00,251.45,2025-10-02,5744669015
+Invoices_hotel/2025/10/2025-10-23-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2025-10-21,2025-10-23,2,245.50,245.50,0.00,2025-10-23,
+maybe/2025/10/2025-10-28-Nash Airport Hotel-3.html,non_official,Nash Airport Hotel,2025-10-28,2025-10-29,1,125.75,0.00,125.75,2025-10-28,
+maybe/2025/11/2025-11-01-Airbnb-2.html,non_official,Airbnb,2025-11-04,2025-11-06,2,168.85,0.00,168.85,2025-11-01,HMF829DHHH
+Invoices_hotel/2025/11/2025-11-20-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2025-11-18,2025-11-20,2,287.50,287.50,0.00,2025-11-20,
+maybe/2025/11/2025-11-01-Ramada Encore by Wyndham Geneva.html,non_official,Ramada Encore by Wyndham Geneva,2025-11-26,2025-11-28,2,265.50,0.00,265.50,2025-11-01,6918437025
+Invoices_hotel/2025/12/2025-12-04-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2025-12-02,2025-12-04,2,257.50,257.50,0.00,2025-12-04,
+maybe/2025/12/2025-12-08-Airbnb.html,non_official,Airbnb,2025-12-09,2025-12-11,2,213.30,0.00,213.30,2025-12-08,HMQ3PQAD23
+Invoices_hotel/2025/12/2025-12-19-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2025-12-17,2025-12-19,2,257.50,257.50,0.00,2025-12-19,
+maybe/2026/01/2026-01-12-Hotel des Tourelles-2.html,non_official,Hotel des Tourelles,2026-01-13,2026-01-15,2,190.40,0.00,190.40,2026-01-12,5257232710
+maybe/2026/01/2026-01-20-ibis budget Geneve Petit-Lancy-3.html,non_official,ibis budget Geneve Petit-Lancy,2026-01-20,2026-01-22,2,147.40,0.00,147.40,2026-01-20,5598153725
+maybe/2026/01/2026-01-27-Airbnb.html,non_official,Airbnb,2026-01-27,2026-01-29,2,185.90,0.00,185.90,2026-01-27,HMXCTFM9RT
+maybe/2026/02/2026-02-03-Ramada Encore by Wyndham Geneva-5.html,non_official,Ramada Encore by Wyndham Geneva,2026-02-03,2026-02-05,2,223.20,0.00,223.20,2026-02-03,5823717697
+maybe/2026/02/2026-02-10-Design Hotel f6-2.html,non_official,Design Hotel f6,2026-02-10,2026-02-12,2,199.55,0.00,199.55,2026-02-10,5471798513
+maybe/2026/02/2026-02-01-Starling Hotel Residence Geneve-2.html,non_official,Starling Hotel Residence Geneve,2026-02-17,2026-02-19,2,233.28,0.00,233.28,2026-02-01,6282223277
+Invoices_hotel/2026/04/2026-04-02-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2026-03-31,2026-04-02,2,268.50,268.50,0.00,2026-04-02,
+Invoices_hotel/2026/04/2026-04-09-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2026-04-07,2026-04-09,2,248.50,248.50,0.00,2026-04-09,
+maybe/2026/04/2026-04-06-Green Marmot Capsule Hotel Geneve.html,non_official,Airbnb,2026-04-14,2026-04-16,2,155.10,0.00,155.10,2026-04-06,HM9925C9AJ
+Invoices_hotel/2026/05/2026-05-08-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2026-05-06,2026-05-08,2,308.50,308.50,0.00,2026-05-08,
+Invoices_hotel/2026/05/2026-05-13-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2026-05-12,2026-05-13,1,144.25,144.25,0.00,2026-05-13,
+Invoices_hotel/2026/05/2026-05-27-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2026-05-26,2026-05-27,1,144.25,144.25,0.00,2026-05-27,
+Invoices_hotel/2026/06/2026-06-04-Starling Hotel Residence Geneve.pdf,official,Starling Hotel Residence Geneve,2026-06-02,2026-06-04,2,288.50,288.50,0.00,2026-06-04,
