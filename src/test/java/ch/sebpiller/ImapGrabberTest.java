@@ -9,43 +9,97 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.TreeSet;
 
 /**
  * Exercises the {@link MailDownloader} builder API end-to-end: it configures a
  * couple of IMAP mailboxes with folder-filtering options and downloads every
  * mail and attachment locally. This is an integration-style test that hits real
- * IMAP servers using the credentials below.
+ * IMAP servers.
+ *
+ * <p>Connection details are <strong>not</strong> hard-coded here: they live in
+ * {@code src/test/resources/mailboxes.properties} (git-ignored). Copy
+ * {@code mailboxes.properties.example} to {@code mailboxes.properties} and fill
+ * in real credentials. Add or remove a mailbox simply by adding or removing a
+ * block of keys in that file - no change to this test is needed.
  */
 @Disabled("DO NOT ENABLE - Not meant to be run automatically CI")
 @Slf4j
 public class ImapGrabberTest {
-    private static Mailbox infomaniak;
-    private static Mailbox gmail;
+
+    /** Classpath location of the externalized connection details. */
+    private static final String MAILBOXES_PROPERTIES = "/mailboxes.properties";
+
+    private static List<Mailbox> mailboxes;
 
     @BeforeAll
     public static void setup() {
-         infomaniak = Mailbox.builder()
-                .host("mail.infomaniak.ch").port(993)
-                .username("me@sebpiller.ch").password("b65f0$.8hRHrU.K-")
-                .build();
-         gmail = Mailbox.builder()
-                .host("imap.gmail.com").port(993)
-                .username("piller.seb@gmail.com").password("tjhb oytj ovcv cqhx")
-                .build();
+        mailboxes = loadMailboxes();
+        log.info("Loaded {} mailbox(es) from {}", mailboxes.size(), MAILBOXES_PROPERTIES);
+    }
+
+    /**
+     * Reads every mailbox declared in {@link #MAILBOXES_PROPERTIES}. Each mailbox
+     * is a group of {@code mailbox.<name>.*} keys; the {@code <name>} is just a
+     * label used to group host/port/username/password together.
+     */
+    private static List<Mailbox> loadMailboxes() {
+        var props = new Properties();
+        try (var in = ImapGrabberTest.class.getResourceAsStream(MAILBOXES_PROPERTIES)) {
+            if (in == null) {
+                throw new IllegalStateException(MAILBOXES_PROPERTIES + " not found on the classpath. "
+                        + "Copy src/test/resources/mailboxes.properties.example to mailboxes.properties.");
+            }
+            props.load(in);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to read " + MAILBOXES_PROPERTIES, e);
+        }
+
+        // Discover the distinct mailbox names from the "mailbox.<name>.host" keys.
+        var names = new TreeSet<String>();
+        for (var key : props.stringPropertyNames()) {
+            if (key.startsWith("mailbox.") && key.endsWith(".host")) {
+                names.add(key.substring("mailbox.".length(), key.length() - ".host".length()));
+            }
+        }
+
+        List<Mailbox> result = new ArrayList<>();
+        for (var name : names) {
+            var prefix = "mailbox." + name + ".";
+            var box = Mailbox.builder()
+                    .host(props.getProperty(prefix + "host"))
+                    .username(props.getProperty(prefix + "username"))
+                    .password(props.getProperty(prefix + "password"));
+            var port = props.getProperty(prefix + "port");
+            if (port != null && !port.isBlank()) {
+                box.port(Integer.parseInt(port.trim()));
+            }
+            result.add(box.build());
+        }
+        return result;
     }
 
     @Test
     public void testDownloadAllMails() {
 
-        DownloadResult result = MailDownloader.builder()
-                .outputDirectory(Paths.get("target/all-mails"))
+        var result = MailDownloader.builder()
+                .outputDirectory(Paths.get("all-my-mails"))
                 .maxParallelMailboxes(4)
                 .maxConsumersPerMailbox(8)
-                // The IMAP accounts to browse in parallel.
-                .mailbox(infomaniak)
-                .mailbox(gmail)
+                // Incremental mode: the first run downloads everything and records a
+                // per-folder UID high-water mark under <output>/.mail-sync-state; any
+                // later run with the same output directory fetches only newer mail.
+                .incremental(true)
+                // The IMAP accounts to browse in parallel (loaded from mailboxes.properties).
+                .mailboxes(mailboxes)
                 // Folders matching ANY exclusion are skipped entirely.
                 .excludeFolder(FolderExclusion.deeperThan(3))
                 .excludeFolder(FolderExclusion.byName("Trash"))
@@ -59,7 +113,7 @@ public class ImapGrabberTest {
                 // Subject: skip newsletters (regex, case-insensitive by flag).
                 .excludeMessage(MessageExclusion.subject(TextMatch.regex("(?i)newsletter")))
                 // Sender: skip a specific address (strict, case-insensitive, trimmed).
-                .excludeMessage(MessageExclusion.sender(
+                .excludeMessage(MessageExclusion.senderEmail(
                         TextMatch.equalTo("no-reply@example.com").caseInsensitive().trimmed()))
                 // Recipient: skip mails addressed to a mailing list.
                 .excludeMessage(MessageExclusion.recipient(TextMatch.regex("(?i)list@sebpiller\\.ch")))

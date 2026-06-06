@@ -12,7 +12,7 @@ import java.util.function.Predicate;
  * <ul>
  *   <li>{@link #date(DateMatch)} &mdash; sent date;</li>
  *   <li>{@link #subject(TextMatch)} &mdash; subject;</li>
- *   <li>{@link #sender(TextMatch)} &mdash; any {@code From} address;</li>
+ *   <li>{@link #senderEmail(TextMatch)} &mdash; any {@code From} address;</li>
  *   <li>{@link #recipient(TextMatch)} &mdash; any recipient address;</li>
  *   <li>{@link #content(TextMatch)} &mdash; the textual body;</li>
  *   <li>{@link #attachment(AttachmentMatch)} &mdash; any attachment.</li>
@@ -44,9 +44,13 @@ public record MessageExclusion(String description, Predicate<MessageView> predic
     }
 
     /** Excludes a message any of whose {@code From} addresses satisfies {@code match}. */
-    public static MessageExclusion sender(TextMatch match) {
+    public static MessageExclusion senderEmail(TextMatch match) {
         return new MessageExclusion("sender " + match.description(),
-                message -> message.senders().stream().anyMatch(match::matches));
+                message -> message.senders().stream().map(MessageExclusion::extractEmailAddress).anyMatch(match::matches));
+    }
+
+    private static String extractEmailAddress(String mailSender) {
+        return mailSender.split("<")[0].trim().split(">")[0].trim();
     }
 
     /** Excludes a message any of whose recipients satisfies {@code match}. */

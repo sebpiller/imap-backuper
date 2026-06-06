@@ -30,15 +30,19 @@ public final class MailboxDownloader {
     private final MessageFilter messageFilter;
     private final DownloadStatistics statistics;
     private final int maxConsumers;
+    /** Incremental high-water-mark state, or {@code null} for a full download. */
+    private final SyncState syncState;
 
     public MailboxDownloader(Mailbox mailbox, FolderScanner folderScanner, MessageWriter messageWriter,
-                             MessageFilter messageFilter, DownloadStatistics statistics, int maxConsumers) {
+                             MessageFilter messageFilter, DownloadStatistics statistics, int maxConsumers,
+                             SyncState syncState) {
         this.mailbox = mailbox;
         this.folderScanner = folderScanner;
         this.messageWriter = messageWriter;
         this.messageFilter = messageFilter;
         this.statistics = statistics;
         this.maxConsumers = maxConsumers;
+        this.syncState = syncState;
     }
 
     /**
@@ -126,17 +130,53 @@ public final class MailboxDownloader {
         log.debug("Producer scanning folder: {}", folderName);
         try {
             folder.open(Folder.READ_ONLY);
-            var messages = folder.getMessages();
+            var messages = selectMessages(folder, folderName);
             statistics.addExpectedMessages(messages.length);
-            log.info("Producer found {} messages in folder: {}", messages.length, folderName);
+            log.info("Producer found {} message(s) to download in folder: {}", messages.length, folderName);
             for (var message : messages) {
-                queue.put(new DownloadMailRef(folderName, message.getMessageNumber(), uidOf(folder, message)));
+                var uid = uidOf(folder, message);
+                if (syncState != null && uid >= 0) {
+                    syncState.recordEnqueued(mailbox.username(), folderName, uid);
+                }
+                queue.put(new DownloadMailRef(folderName, message.getMessageNumber(), uid));
             }
         } finally {
             if (folder.isOpen()) {
                 folder.close();
             }
         }
+    }
+
+    /**
+     * Returns the messages of {@code folder} to enqueue. For a full download (or a
+     * folder that is not UID-capable) that is every message; for an incremental
+     * download of a UID folder whose {@code UIDVALIDITY} still matches the stored
+     * mark, it is only the messages with a UID strictly greater than that mark.
+     */
+    private Message[] selectMessages(Folder folder, String folderName) throws MessagingException {
+        if (syncState == null || !(folder instanceof UIDFolder uidFolder)) {
+            return folder.getMessages();
+        }
+
+        var validity = uidFolder.getUIDValidity();
+        var resumeAfter = syncState.resumeAfterUid(mailbox.username(), folderName, validity);
+        syncState.beginFolder(mailbox.username(), folderName, validity, resumeAfter);
+        if (resumeAfter <= 0) {
+            return folder.getMessages();
+        }
+
+        // getMessagesByUID(start, LASTUID) returns the highest-UID message even when
+        // none are newer than 'start', so filter to UIDs strictly above the mark.
+        var candidates = uidFolder.getMessagesByUID(resumeAfter + 1, UIDFolder.LASTUID);
+        List<Message> fresh = new ArrayList<>(candidates.length);
+        for (var message : candidates) {
+            if (uidFolder.getUID(message) > resumeAfter) {
+                fresh.add(message);
+            }
+        }
+        log.info("Incremental scan of folder '{}': resuming after UID {} (validity {})",
+                folderName, resumeAfter, validity);
+        return fresh.toArray(Message[]::new);
     }
 
     private long uidOf(Folder folder, Message message) {
@@ -184,6 +224,11 @@ public final class MailboxDownloader {
                     }
                     messageWriter.write(message);
                 } catch (Exception e) {
+                    if (syncState != null && mailRef.uid() >= 0) {
+                        // Don't advance the high-water mark past a message we failed to
+                        // save, so the next incremental run retries it.
+                        syncState.recordFailure(mailbox.username(), mailRef.folderName(), mailRef.uid());
+                    }
                     log.warn("Consumer {} failed saving message {} from folder '{}' of mailbox {}: {}",
                             consumerId, mailRef.messageNumber(), mailRef.folderName(),
                             mailbox.username(), e.getMessage());

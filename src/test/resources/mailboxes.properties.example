@@ -1,0 +1,22 @@
+# Copy this file to "mailboxes.properties" (same directory) and fill in real
+# credentials. The real file is git-ignored so secrets never get committed.
+#
+# To ADD a mailbox: add a block of keys sharing a new <name>.
+# To REMOVE a mailbox: delete (or comment out) its block.
+# The <name> is just a label to group the keys together; it has no other meaning.
+# "port" is optional and defaults to 993 (IMAP over SSL).
+#
+#   mailbox.<name>.host
+#   mailbox.<name>.port      (optional, default 993)
+#   mailbox.<name>.username
+#   mailbox.<name>.password
+
+mailbox.infomaniak.host=mail.infomaniak.ch
+mailbox.infomaniak.port=993
+mailbox.infomaniak.username=me@example.com
+mailbox.infomaniak.password=change-me
+
+mailbox.gmail.host=imap.gmail.com
+mailbox.gmail.port=993
+mailbox.gmail.username=me@gmail.com
+mailbox.gmail.password=app-password

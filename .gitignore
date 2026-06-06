@@ -41,3 +41,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Test secrets (real IMAP credentials) - keep the .example template only ###
+src/test/resources/mailboxes.properties
+/all-my-mails/

@@ -9,6 +9,8 @@ import ch.sebpiller.mail.internal.MailboxDownloader;
 import ch.sebpiller.mail.internal.MessageFilter;
 import ch.sebpiller.mail.internal.MessageWriter;
 import ch.sebpiller.mail.internal.ProgressReporter;
+import ch.sebpiller.mail.internal.SyncState;
+import ch.sebpiller.mail.internal.SyncStateStore;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,6 +54,8 @@ public final class MailDownloader {
     private final int maxConsumersPerMailbox;
     private final List<FolderExclusion> folderExclusions;
     private final List<MessageExclusion> messageExclusions;
+    private final boolean incremental;
+    private final Path syncStateFile;
 
     private MailDownloader(Builder builder) {
         this.mailboxes = List.copyOf(builder.mailboxes);
@@ -60,6 +64,10 @@ public final class MailDownloader {
         this.maxConsumersPerMailbox = builder.maxConsumersPerMailbox;
         this.folderExclusions = List.copyOf(builder.folderExclusions);
         this.messageExclusions = List.copyOf(builder.messageExclusions);
+        this.incremental = builder.incremental;
+        this.syncStateFile = builder.syncStateFile != null
+                ? builder.syncStateFile
+                : builder.outputDirectory.resolve(".mail-sync-state");
     }
 
     public static Builder builder() {
@@ -77,8 +85,10 @@ public final class MailDownloader {
         var folderScanner = new FolderScanner(folderExclusions);
         var messageWriter = new MessageWriter(outputDir, statistics);
         var messageFilter = new MessageFilter(messageExclusions);
+        var syncState = incremental ? SyncStateStore.load(syncStateFile) : null;
 
-        log.info("Starting full mail download from {} mailbox(es) into {}", mailboxes.size(), outputDir);
+        log.info("Starting {} mail download from {} mailbox(es) into {}",
+                incremental ? "incremental" : "full", mailboxes.size(), outputDir);
         var startNanos = System.nanoTime();
 
         try (var ignored = ProgressReporter.start(statistics, startNanos, 10)) {
@@ -87,8 +97,8 @@ public final class MailDownloader {
             try {
                 List<CompletableFuture<?>> futures = new ArrayList<>(mailboxes.size());
                 for (var mailbox : mailboxes) {
-                    var downloader = new MailboxDownloader(
-                            mailbox, folderScanner, messageWriter, messageFilter, statistics, maxConsumersPerMailbox);
+                    var downloader = new MailboxDownloader(mailbox, folderScanner, messageWriter,
+                            messageFilter, statistics, maxConsumersPerMailbox, syncState);
                     futures.add(CompletableFuture.runAsync(downloader::download, executor));
                 }
                 CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
@@ -97,6 +107,11 @@ public final class MailDownloader {
                 if (!executor.awaitTermination(30, TimeUnit.MINUTES)) {
                     log.warn("Timed out waiting for mailbox tasks to terminate; forcing shutdown");
                     executor.shutdownNow();
+                }
+                // Persist the high-water marks even on partial failure so the next
+                // incremental run resumes from whatever was downloaded.
+                if (syncState != null) {
+                    SyncStateStore.save(syncStateFile, syncState);
                 }
             }
         }
@@ -134,6 +149,12 @@ public final class MailDownloader {
         // Each folder worker needs its own IMAP connection, so this also bounds the
         // number of simultaneous connections opened per account.
         private int maxConsumersPerMailbox = 8;
+        // When true, only messages newer than the last run's per-folder UID
+        // high-water mark are downloaded.
+        private boolean incremental = false;
+        // Where the per-folder high-water marks are persisted; null means
+        // "<outputDirectory>/.mail-sync-state".
+        private Path syncStateFile = null;
 
         private Builder() {
         }
@@ -177,6 +198,28 @@ public final class MailDownloader {
         /** Adds a message-exclusion strategy; messages matching ANY exclusion are skipped. */
         public Builder excludeMessage(MessageExclusion exclusion) {
             this.messageExclusions.add(exclusion);
+            return this;
+        }
+
+        /**
+         * Enables incremental downloads: each run remembers, per folder, the highest
+         * IMAP UID it processed (in the {@linkplain #syncStateFile(Path) sync-state
+         * file}), and subsequent runs only fetch messages newer than that mark. A
+         * folder whose {@code UIDVALIDITY} changed since the last run is fully
+         * re-downloaded. Disabled by default.
+         */
+        public Builder incremental(boolean incremental) {
+            this.incremental = incremental;
+            return this;
+        }
+
+        /**
+         * Overrides where the incremental high-water marks are stored. Defaults to
+         * {@code <outputDirectory>/.mail-sync-state}. Only used when
+         * {@link #incremental(boolean) incremental} is enabled.
+         */
+        public Builder syncStateFile(Path syncStateFile) {
+            this.syncStateFile = syncStateFile;
             return this;
         }
 
