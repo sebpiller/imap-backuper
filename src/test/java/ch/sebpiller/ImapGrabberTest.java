@@ -1,6 +1,5 @@
 package ch.sebpiller;
 
-import ch.sebpiller.mail.DownloadResult;
 import ch.sebpiller.mail.MailDownloader;
 import ch.sebpiller.mail.Mailbox;
 import ch.sebpiller.mail.filter.*;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -101,10 +99,10 @@ public class ImapGrabberTest {
                 // The IMAP accounts to browse in parallel (loaded from mailboxes.properties).
                 .mailboxes(mailboxes)
                 // Folders matching ANY exclusion are skipped entirely.
-                .excludeFolder(FolderExclusion.deeperThan(3))
+              //  .excludeFolder(FolderExclusion.deeperThan(3))
                 .excludeFolder(FolderExclusion.byName("Trash"))
                 .excludeFolder(FolderExclusion.byName("Junk"))
-                .excludeFolder(FolderExclusion.byName("Archives"))
+             //   .excludeFolder(FolderExclusion.byName("Archives"))
                 .excludeFolder(FolderExclusion.byRegex("(?i).*\\bspam\\b.*"))
                 // Messages matching ANY exclusion are skipped (never written to disk).
                 // Date: skip everything sent before 2015.
