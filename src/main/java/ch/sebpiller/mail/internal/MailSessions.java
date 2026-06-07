@@ -10,6 +10,24 @@ import java.util.Properties;
  */
 public final class MailSessions {
 
+    static {
+        // Read by JavaMail from global system properties (not the session). Be lenient
+        // when decoding slightly non-compliant encoded-words so MimeUtility.decodeText
+        // returns a best effort rather than throwing.
+        //
+        // NB: we deliberately do NOT set mail.mime.decodefilename=true. With that flag
+        // Part.getFileName() *throws* "Can't decode filename" on a malformed encoded
+        // name, which would abort the whole message; instead MessageWriter decodes the
+        // raw filename itself and falls back gracefully.
+        setDefault("mail.mime.decodetext.strict", "false");
+    }
+
+    private static void setDefault(String key, String value) {
+        if (System.getProperty(key) == null) {
+            System.setProperty(key, value);
+        }
+    }
+
     private MailSessions() {
     }
 

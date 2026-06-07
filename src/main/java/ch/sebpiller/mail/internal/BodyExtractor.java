@@ -4,106 +4,173 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
-import javax.mail.Header;
 import javax.mail.internet.ContentType;
-import javax.mail.internet.MimeUtility;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
 
 /**
- * Flattens the readable (non-attachment) parts of a MIME message into a single
- * text or HTML body, annotating non-trivial parts with section headers.
+ * Flattens the readable (non-attachment) parts of a MIME message, keeping the
+ * HTML and plain-text representations in <em>separate</em> buffers so the writer
+ * can emit a clean {@code body.html} (when the mail provides HTML) or a
+ * {@code body.txt} - never a mix of the two. For a {@code multipart/alternative}
+ * part only the richest representation is kept, so the HTML body is not polluted
+ * with the plain-text twin or with diagnostic markers.
  */
 public final class BodyExtractor {
 
     private BodyExtractor() {
     }
 
-    /** The flattened body and whether any part of it was HTML. */
-    public record BodyContent(String content, boolean html) {
+    /**
+     * The extracted body: the flattened plain-text representation and the
+     * flattened HTML representation. Either may be empty.
+     */
+    public record BodyContent(String text, String html) {
+
+        /** Whether an HTML representation is available (and should be written as {@code body.html}). */
+        public boolean hasHtml() {
+            return html != null && !html.isBlank();
+        }
+
+        /** The body to write to disk: the HTML when present, otherwise the plain text. */
+        public String body() {
+            return hasHtml() ? html : text;
+        }
+
+        /** Combined representation used for content-based filtering (sees both text and HTML). */
+        public String content() {
+            if (hasHtml()) {
+                return text.isBlank() ? html : text + "\n" + html;
+            }
+            return text;
+        }
     }
 
     public static BodyContent extract(Part part) throws MessagingException, IOException {
-        var content = new StringBuilder();
-        var sawHtml = appendBodyContent(part, content, "");
-        return new BodyContent(content.toString(), sawHtml);
+        var text = new StringBuilder();
+        var html = new StringBuilder();
+        append(part, text, html);
+        return new BodyContent(text.toString(), html.toString());
     }
 
-    private static boolean appendBodyContent(Part part, StringBuilder target, String path)
+    private static void append(Part part, StringBuilder text, StringBuilder html)
             throws MessagingException, IOException {
         if (isAttachment(part)) {
-            return false;
+            return;
         }
 
         Object content;
         try {
             content = part.getContent();
         } catch (IOException | RuntimeException e) {
-            appendRawReadablePart(part, target, path, e);
-            return false;
+            // Could not decode the part; fall back to its raw bytes.
+            appendDecodedRaw(part, text, html);
+            return;
         }
 
         if (content instanceof Multipart multipart) {
-
-            var sawHtml = false;
-            for (var i = 0; i < multipart.getCount(); i++) {
-                var childPath = path.isBlank() ? String.valueOf(i + 1) : path + "." + (i + 1);
-                sawHtml |= appendBodyContent(multipart.getBodyPart(i), target, childPath);
+            if (isAlternative(part)) {
+                appendAlternative(multipart, text, html);
+            } else {
+                for (var i = 0; i < multipart.getCount(); i++) {
+                    append(multipart.getBodyPart(i), text, html);
+                }
             }
-            return sawHtml;
+            return;
         }
 
-        if (content instanceof Message nestedMessage) {
-            appendSectionHeader(part, target, path);
-            target.append("Nested message");
-            var subject = nestedMessage.getSubject();
-            if (subject != null && !subject.isBlank()) {
-                target.append(": ").append(subject);
-            }
-            target.append("\n");
-            return appendBodyContent(nestedMessage, target, path.isBlank() ? "message" : path + ".message");
+        if (content instanceof Message nested) {
+            var subject = nested.getSubject();
+            appendBlock(text, "Nested message" + (subject != null && !subject.isBlank() ? ": " + subject : ""));
+            append(nested, text, html);
+            return;
         }
 
         if (content instanceof String string) {
-            //  appendSectionHeader(part, target, path);
-            target.append(string).append("\n");
-            return part.isMimeType("text/html");
+            appendBlock(isHtml(part) ? html : text, string);
+            return;
         }
 
         if (part.isMimeType("text/*")) {
-            appendRawReadablePart(part, target, path, null);
-            return part.isMimeType("text/html");
+            appendDecodedRaw(part, text, html);
+            return;
         }
 
         if (content != null) {
-            appendSectionHeader(part, target, path);
-            target.append("Non-text body part decoded as ")
-                    .append(content.getClass().getName())
-                    .append("\n")
-                    .append(String.valueOf(content))
-                    .append("\n");
+            appendBlock(text, "Non-text body part decoded as " + content.getClass().getName() + "\n" + content);
         }
-        return false;
+    }
+
+    /**
+     * Handles a {@code multipart/alternative}: keeps only the richest representation.
+     * The HTML alternative is preferred for {@code body.html}; the plain-text
+     * alternative is still retained in the text buffer so content filtering can see
+     * it, but it is never written into the HTML body.
+     */
+    private static void appendAlternative(Multipart multipart, StringBuilder text, StringBuilder html)
+            throws MessagingException, IOException {
+        StringBuilder bestHtml = null;
+        StringBuilder bestText = null;
+        for (var i = 0; i < multipart.getCount(); i++) {
+            var partText = new StringBuilder();
+            var partHtml = new StringBuilder();
+            append(multipart.getBodyPart(i), partText, partHtml);
+            if (!partHtml.isEmpty()) {
+                bestHtml = partHtml; // prefer the last (richest) HTML alternative
+            } else if (!partText.isEmpty() && (bestText == null || partText.length() > bestText.length())) {
+                bestText = partText;
+            }
+        }
+        if (bestText != null) {
+            appendBlock(text, bestText.toString());
+        }
+        if (bestHtml != null) {
+            appendBlock(html, bestHtml.toString());
+        }
+    }
+
+    /** Appends a non-empty block to {@code target}, separating successive blocks with a blank line. */
+    private static void appendBlock(StringBuilder target, String value) {
+        if (value == null || value.isEmpty()) {
+            return;
+        }
+        if (!target.isEmpty()) {
+            target.append("\n");
+        }
+        target.append(value);
+    }
+
+    private static void appendDecodedRaw(Part part, StringBuilder text, StringBuilder html)
+            throws MessagingException {
+        var target = isHtml(part) ? html : text;
+        try (var input = part.getInputStream()) {
+            appendBlock(target, new String(input.readAllBytes(), charsetFor(part)));
+        } catch (IOException e) {
+            // Keep diagnostics out of the HTML body so it stays well-formed.
+            if (target != html) {
+                appendBlock(text, "Raw content unavailable: " + e.getMessage());
+            }
+        }
     }
 
     private static boolean isAttachment(Part part) throws MessagingException {
         return Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition());
     }
 
-    private static void appendRawReadablePart(Part part, StringBuilder target, String path, Exception decodeError)
-            throws MessagingException, IOException {
-        appendSectionHeader(part, target, path);
-        if (decodeError != null) {
-            target.append("Decoded content unavailable: ")
-                    .append(decodeError.getMessage())
-                    .append("\n");
+    private static boolean isAlternative(Part part) {
+        try {
+            return part.isMimeType("multipart/alternative");
+        } catch (MessagingException e) {
+            return false;
         }
-        try (var input = part.getInputStream()) {
-            target.append(new String(input.readAllBytes(), charsetFor(part))).append("\n");
-        } catch (IOException e) {
-            target.append("Raw content unavailable: ").append(e.getMessage()).append("\n");
+    }
+
+    private static boolean isHtml(Part part) {
+        try {
+            return part.isMimeType("text/html");
+        } catch (MessagingException e) {
+            return false;
         }
     }
 
@@ -117,50 +184,5 @@ public final class BodyExtractor {
             // Fall through to UTF-8 when the header is missing or malformed.
         }
         return StandardCharsets.UTF_8;
-    }
-
-    private static void appendSectionHeader(Part part, StringBuilder target, String path) throws MessagingException {
-        if (!target.isEmpty()) {
-            target.append("\n");
-        }
-        target.append("===== body");
-        if (path != null && !path.isBlank()) {
-            target.append(".").append(path);
-        }
-        target.append(" =====\n");
-        target.append("Content-Type: ").append(part.getContentType()).append("\n");
-        var disposition = part.getDisposition();
-        if (disposition != null && !disposition.isBlank()) {
-            target.append("Disposition: ").append(disposition).append("\n");
-        }
-        var filename = part.getFileName();
-        if (filename != null && !filename.isBlank()) {
-            target.append("Filename: ").append(decodeHeader(filename)).append("\n");
-        }
-        target.append("Headers:\n").append(formatHeaders(part.getAllHeaders()));
-        target.append("\n");
-    }
-
-    private static String decodeHeader(String value) {
-        try {
-            return MimeUtility.decodeText(value);
-        } catch (Exception e) {
-            return value;
-        }
-    }
-
-    /**
-     * Formats mail headers as a string for logging or content extraction.
-     */
-    private static String formatHeaders(Enumeration<Header> headers) {
-        if (headers == null) {
-            return "";
-        }
-        var sb = new StringBuilder();
-        while (headers.hasMoreElements()) {
-            var header = headers.nextElement();
-            sb.append(header.getName()).append(": ").append(header.getValue()).append("\n");
-        }
-        return sb.toString();
     }
 }

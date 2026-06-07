@@ -13,16 +13,20 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * Reads and writes a {@link SyncState} to a small, human-readable text file used
  * to drive incremental downloads. Each line holds one folder's high-water mark as
- * TAB-separated fields:
+ * TAB-separated fields, with an optional 5th field listing the UIDs awaiting retry:
  *
  * <pre>{@code
  * # mail-sync-state v1
- * # username<TAB>folderFullName<TAB>uidValidity<TAB>lastUid
+ * # username<TAB>folderFullName<TAB>uidValidity<TAB>lastUid[<TAB>failedUids]
  * me@example.com	INBOX	1700000000	9981
+ * me@example.com	Archives	1372845749	3923	228,541
  * }</pre>
  *
  * <p>Deleting the file simply makes the next run a full download again.
@@ -31,7 +35,7 @@ import java.util.Map;
 public final class SyncStateStore {
 
     private static final String HEADER = "# mail-sync-state v1\n"
-            + "# username\tfolderFullName\tuidValidity\tlastUid\n";
+            + "# username\tfolderFullName\tuidValidity\tlastUid[\tfailedUids]\n";
 
     private SyncStateStore() {
     }
@@ -52,14 +56,15 @@ public final class SyncStateStore {
                     continue;
                 }
                 var fields = line.split("\t", -1);
-                if (fields.length != 4) {
-                    log.warn("Ignoring malformed sync-state line (expected 4 fields): {}", line);
+                // 4 fields = legacy line without the retry list; 5 = with it.
+                if (fields.length < 4 || fields.length > 5) {
+                    log.warn("Ignoring malformed sync-state line (expected 4 or 5 fields): {}", line);
                     continue;
                 }
                 try {
                     var key = new Key(fields[0], fields[1]);
-                    var mark = new Mark(Long.parseLong(fields[2]), Long.parseLong(fields[3]));
-                    marks.put(key, mark);
+                    var failed = fields.length == 5 ? parseUids(fields[4]) : Set.<Long>of();
+                    marks.put(key, new Mark(Long.parseLong(fields[2]), Long.parseLong(fields[3]), failed));
                 } catch (NumberFormatException e) {
                     log.warn("Ignoring sync-state line with non-numeric uid/validity: {}", line);
                 }
@@ -88,7 +93,12 @@ public final class SyncStateStore {
             sb.append(entry.getKey().username()).append('\t')
                     .append(entry.getKey().folderFullName()).append('\t')
                     .append(entry.getValue().uidValidity()).append('\t')
-                    .append(entry.getValue().lastUid()).append('\n');
+                    .append(entry.getValue().lastUid());
+            var failed = entry.getValue().failedUids();
+            if (!failed.isEmpty()) {
+                sb.append('\t').append(formatUids(failed));
+            }
+            sb.append('\n');
         }
         try {
             if (file.getParent() != null) {
@@ -99,5 +109,23 @@ public final class SyncStateStore {
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to write sync-state file " + file, e);
         }
+    }
+
+    private static Set<Long> parseUids(String csv) {
+        if (csv.isBlank()) {
+            return Set.of();
+        }
+        Set<Long> uids = new TreeSet<>();
+        for (var token : csv.split(",")) {
+            if (!token.isBlank()) {
+                uids.add(Long.parseLong(token.trim()));
+            }
+        }
+        return uids;
+    }
+
+    private static String formatUids(Set<Long> uids) {
+        // Sorted for a stable, readable file.
+        return new TreeSet<>(uids).stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 }

@@ -7,7 +7,9 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import javax.mail.internet.MimeUtility;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.OutputStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -39,7 +41,7 @@ public final class MessageWriter {
      */
     public void write(Message message) throws MessagingException, IOException {
         var from = message.getFrom() != null && message.getFrom().length > 0
-                ? message.getFrom()[0].toString()
+                ? decodeMimeHeader(message.getFrom()[0].toString())
                 : "Unknown";
 
         var sentDate = message.getSentDate();
@@ -71,10 +73,10 @@ public final class MessageWriter {
             }
         }
 
-        // Body text
+        // Body text: write either a clean body.html or a body.txt, never a mix.
         var bodyContent = BodyExtractor.extract(message);
-        var bodyFileName = bodyContent.html() ? "body.html" : "body.txt";
-        Files.writeString(mailDir.resolve(bodyFileName), bodyContent.content());
+        var bodyFileName = bodyContent.hasHtml() ? "body.html" : "body.txt";
+        Files.writeString(mailDir.resolve(bodyFileName), bodyContent.body());
         // Attachments
         saveAttachmentsToDir(message, mailDir);
 
@@ -106,12 +108,23 @@ public final class MessageWriter {
             return;
         }
 
-        var filename = part.getFileName();
+        String filename;
+        try {
+            filename = part.getFileName();
+        } catch (MessagingException e) {
+            // getFileName() can throw (e.g. "Can't decode filename") on a malformed
+            // encoded-word name. Such a part is still an attachment, so save it under a
+            // fallback name rather than failing the whole message.
+            log.debug("Could not read attachment filename: {}", e.getMessage());
+            filename = "attachment";
+        }
         if (filename == null || filename.isBlank()) {
             return;
         }
 
-        var safeName = MailFiles.sanitizeFileName(filename);
+        // Filenames are often RFC 2047 encoded-words (e.g. "=?UTF-8?Q?facture=C3=A9.pdf?=");
+        // decode before sanitizing so the file lands on disk under its real name.
+        var safeName = MailFiles.sanitizeFileName(decodeMimeHeader(filename));
         var dot = safeName.lastIndexOf('.');
         var baseName = dot >= 0 ? safeName.substring(0, dot) : safeName;
         var extension = dot >= 0 ? safeName.substring(dot) : "";
@@ -132,6 +145,22 @@ public final class MessageWriter {
             is.transferTo(o);
             var saved = statistics.recordAttachmentSaved();
             log.info("Saved attachment [#{}]: {} -> {}", saved, filename, targetFile);
+        }
+    }
+
+    /**
+     * Decodes RFC 2047 encoded-word headers (subjects, sender names, filenames) into
+     * plain Unicode. Returns the value unchanged when it is not encoded or cannot be
+     * decoded, so a malformed header never aborts a download.
+     */
+    private static String decodeMimeHeader(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            return MimeUtility.decodeText(value);
+        } catch (UnsupportedEncodingException e) {
+            return value;
         }
     }
 }

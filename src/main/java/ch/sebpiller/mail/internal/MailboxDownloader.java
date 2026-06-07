@@ -151,7 +151,9 @@ public final class MailboxDownloader {
      * Returns the messages of {@code folder} to enqueue. For a full download (or a
      * folder that is not UID-capable) that is every message; for an incremental
      * download of a UID folder whose {@code UIDVALIDITY} still matches the stored
-     * mark, it is only the messages with a UID strictly greater than that mark.
+     * mark, it is the messages with a UID strictly greater than that mark, plus any
+     * messages that failed on a previous run (retried individually so they never
+     * block progress on the rest of the folder).
      */
     private Message[] selectMessages(Folder folder, String folderName) throws MessagingException {
         if (syncState == null || !(folder instanceof UIDFolder uidFolder)) {
@@ -165,18 +167,31 @@ public final class MailboxDownloader {
             return folder.getMessages();
         }
 
-        // getMessagesByUID(start, LASTUID) returns the highest-UID message even when
-        // none are newer than 'start', so filter to UIDs strictly above the mark.
-        var candidates = uidFolder.getMessagesByUID(resumeAfter + 1, UIDFolder.LASTUID);
-        List<Message> fresh = new ArrayList<>(candidates.length);
-        for (var message : candidates) {
+        List<Message> selected = new ArrayList<>();
+        // New messages above the high-water mark. getMessagesByUID(start, LASTUID)
+        // returns the highest-UID message even when none are newer than 'start', so
+        // filter to UIDs strictly above the mark.
+        for (var message : uidFolder.getMessagesByUID(resumeAfter + 1, UIDFolder.LASTUID)) {
             if (uidFolder.getUID(message) > resumeAfter) {
-                fresh.add(message);
+                selected.add(message);
             }
         }
-        log.info("Incremental scan of folder '{}': resuming after UID {} (validity {})",
-                folderName, resumeAfter, validity);
-        return fresh.toArray(Message[]::new);
+        // Messages that failed on a previous run: re-fetch them by UID (skipping any
+        // that no longer exist). They sit at or below the mark, so they would not be
+        // picked up by the range scan above.
+        var retry = syncState.retryUids(mailbox.username(), folderName, validity);
+        if (!retry.isEmpty()) {
+            var retryUids = retry.stream().mapToLong(Long::longValue).toArray();
+            for (var message : uidFolder.getMessagesByUID(retryUids)) {
+                if (message != null) {
+                    selected.add(message);
+                }
+            }
+        }
+        log.info("Incremental scan of folder '{}': resuming after UID {} (validity {}){}",
+                folderName, resumeAfter, validity,
+                retry.isEmpty() ? "" : ", retrying " + retry.size() + " previously-failed message(s)");
+        return selected.toArray(Message[]::new);
     }
 
     private long uidOf(Folder folder, Message message) {
@@ -225,8 +240,8 @@ public final class MailboxDownloader {
                     messageWriter.write(message);
                 } catch (Exception e) {
                     if (syncState != null && mailRef.uid() >= 0) {
-                        // Don't advance the high-water mark past a message we failed to
-                        // save, so the next incremental run retries it.
+                        // Remember this UID so the next incremental run retries just this
+                        // message - without holding back the folder's high-water mark.
                         syncState.recordFailure(mailbox.username(), mailRef.folderName(), mailRef.uid());
                     }
                     log.warn("Consumer {} failed saving message {} from folder '{}' of mailbox {}: {}",

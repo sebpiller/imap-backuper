@@ -103,26 +103,26 @@ public class ImapGrabberTest {
                 .excludeFolder(FolderExclusion.byName("Trash"))
                 .excludeFolder(FolderExclusion.byName("Junk"))
              //   .excludeFolder(FolderExclusion.byName("Archives"))
-                .excludeFolder(FolderExclusion.byRegex("(?i).*\\bspam\\b.*"))
+           //     .excludeFolder(FolderExclusion.byRegex("(?i).*\\bspam\\b.*"))
                 // Messages matching ANY exclusion are skipped (never written to disk).
                 // Date: skip everything sent before 2015.
-                .excludeMessage(MessageExclusion.date(
-                        DateMatch.before(Instant.parse("2015-01-01T00:00:00Z"))))
-                // Subject: skip newsletters (regex, case-insensitive by flag).
-                .excludeMessage(MessageExclusion.subject(TextMatch.regex("(?i)newsletter")))
-                // Sender: skip a specific address (strict, case-insensitive, trimmed).
-                .excludeMessage(MessageExclusion.senderEmail(
-                        TextMatch.equalTo("no-reply@example.com").caseInsensitive().trimmed()))
-                // Recipient: skip mails addressed to a mailing list.
-                .excludeMessage(MessageExclusion.recipient(TextMatch.regex("(?i)list@sebpiller\\.ch")))
-                // Content: skip mails whose body mentions "unsubscribe".
-                .excludeMessage(MessageExclusion.content(TextMatch.regex("(?i)unsubscribe")))
-                // Attachments: skip mails carrying an image attachment.
-                .excludeMessage(MessageExclusion.attachment(
-                        AttachmentMatch.mimeType(TextMatch.regex("(?i)image/.*"))))
-                // Attachments: skip mails carrying an image attachment.
-                .excludeMessage(MessageExclusion.attachment(
-                        AttachmentMatch.mimeType(TextMatch.regex("(?i)image/.*"))))
+//                .excludeMessage(MessageExclusion.date(
+//                        DateMatch.before(Instant.parse("2015-01-01T00:00:00Z"))))
+//                // Subject: skip newsletters (regex, case-insensitive by flag).
+//                .excludeMessage(MessageExclusion.subject(TextMatch.regex("(?i)newsletter")))
+//                // Sender: skip a specific address (strict, case-insensitive, trimmed).
+//                .excludeMessage(MessageExclusion.senderEmail(
+//                        TextMatch.equalTo("no-reply@example.com").caseInsensitive().trimmed()))
+//                // Recipient: skip mails addressed to a mailing list.
+//                .excludeMessage(MessageExclusion.recipient(TextMatch.regex("(?i)list@sebpiller\\.ch")))
+//                // Content: skip mails whose body mentions "unsubscribe".
+//                .excludeMessage(MessageExclusion.content(TextMatch.regex("(?i)unsubscribe")))
+//                // Attachments: skip mails carrying an image attachment.
+//                .excludeMessage(MessageExclusion.attachment(
+//                        AttachmentMatch.mimeType(TextMatch.regex("(?i)image/.*"))))
+//                // Attachments: skip mails carrying an image attachment.
+//                .excludeMessage(MessageExclusion.attachment(
+//                        AttachmentMatch.mimeType(TextMatch.regex("(?i)image/.*"))))
                 .build()
                 .run();
 
